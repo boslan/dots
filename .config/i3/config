@@ -29,7 +29,7 @@ set_from_resource $hl 		i3wm.color15 #ff0000
 #client.urgent           $bg     $bg     $fg  $bg       $bg
 #client.placeholder      $bg     $bg     $fg  $bg       $bg
 
-client.focused          $fg-alt     $bg     $hl  $fg-alt        $hl
+client.focused          $fg-alt     $bg     $hl  $hl        $hl
 client.focused_inactive $fg-alt     $bg     $fg  $fg-alt        $fg-alt
 client.unfocused        $fg-alt     $bg     $fg  $fg-alt        $fg-alt
 client.urgent           $fg-alt     $bg     $fg  $fg-alt        $fg-alt
@@ -40,6 +40,7 @@ client.background       $bg
 gaps outer 0
 gaps inner 6
 
+for_window [class="feh"] floating enable
 for_window [class="^.*"] border pixel 4
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -59,6 +60,9 @@ font pango:hack 10
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+
+# start slack
+bindsym $mod+F12 exec --no-startup-id slack
 
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
@@ -138,6 +142,8 @@ set $ws8 "8"
 set $ws9 "9"
 set $ws10 "10"
 
+workspace 1 output DVI-D-0
+
 # switch to workspace
 bindsym $mod+1 workspace $ws1
 bindsym $mod+2 workspace $ws2
@@ -149,6 +155,9 @@ bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
+
+bindsym $mod+Control+Left workspace prev
+bindsym $mod+Control+Right workspace next
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $ws1
@@ -177,16 +186,16 @@ mode "resize" {
         # Pressing right will grow the window’s width.
         # Pressing up will shrink the window’s height.
         # Pressing down will grow the window’s height.
-        bindsym j resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym l resize shrink height 10 px or 10 ppt
-        bindsym semicolon resize grow width 10 px or 10 ppt
+        bindsym j resize shrink width 5 px or 5 ppt
+        bindsym k resize grow height 5 px or 5 ppt
+        bindsym l resize shrink height 5 px or 5 ppt
+        bindsym semicolon resize grow width 5 px or 5 ppt
 
         # same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+        bindsym Left resize shrink width 5 px or 5 ppt
+        bindsym Down resize grow height 5 px or 5 ppt
+        bindsym Up resize shrink height 5 px or 5 ppt
+        bindsym Right resize grow width 5 px or 5 ppt
 
         # back to normal: Enter or Escape or $mod+r
         bindsym Return mode "default"
@@ -203,16 +212,16 @@ bindsym $mod+r mode "resize"
 #        status_command i3blocks
 #}
 
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5% #increase sound volume
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5% #decrease sound volume
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 
 bindsym --release $mod+Shift+Print exec scrot -s
 bindsym --release $mod+Print exec scrot -u
 bindsym --release Print exec scrot
 
 exec --no-startup-id nitrogen --restore
-exec --no-startup-id wal -R
+exec --no-startup-id wal -R -n
 exec --no-startup-id $HOME/.config/polybar/launch.sh
 exec_always --no-startup-id setxkbmap -option 'grp:alt_shift_toggle' -layout us,ru
 exec --no-startup-id slack
