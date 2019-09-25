@@ -1,17 +1,28 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'lifepillar/vim-solarized8'
+Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
+" Plug 'leafgarland/typescript-vim'
 Plug 'itchyny/lightline.vim'
 Plug 'ryanoasis/vim-devicons'
 Plug 'junegunn/fzf.vim'
-Plug 'townk/vim-autoclose'
 Plug 'scrooloose/nerdtree'
+Plug 'itchyny/vim-gitbranch'
  
 call plug#end()
 
 " set path=.,src,node_nodules
 
-set timeoutlen=1000 ttimeoutlen=0
+set termguicolors
+set background=dark
+colorscheme solarized8
+let g:solarized_termtrans = 1
+
+set listchars=tab:→\ ,trail:─,extends:❭,precedes:❬,nbsp:+
+set fillchars=vert:┃,fold:-
+set signcolumn=yes
+
+set timeoutlen=1000 ttimeoutlen=100
 set autowriteall
 set encoding=UTF-8
 
@@ -22,7 +33,7 @@ set ruler
 set number
 
 " Necesary  for lots of cool vim things
-set nocompatible
+set nocp
 
 " This shows what you are typing as a command
 set showcmd
@@ -43,8 +54,7 @@ set incsearch
 set hlsearch
 
 let g:fzf_command_prefix = 'Fzf'
-let g:coc_global_extensions = ['coc-tsserver', 'coc-tslint', 'coc-tslint-plugin']
-
+let g:coc_global_extensions = ['coc-tsserver', 'coc-emmet', 'coc-tslint-plugin']
 
 nnoremap <silent><Leader>o :FzfFiles<CR>
 nnoremap <silent><Leader>O :FzfFiles!<CR>
@@ -52,8 +62,8 @@ nnoremap <silent><Leader>t :FzfTags<CR>
 nnoremap <silent><Leader>s :FzfAg<CR>
 nnoremap <silent><Leader><Space> :FzfGTags<CR>
 nnoremap <silent>; :FzfBuffers<CR>
-nnoremap <silent><Leader>f :NERDTreeToggle<CR>
-nnoremap <silent><Esc><Esc> :let @/ = ""<CR>
+nnoremap <silent><Leader>n :NERDTreeToggle<CR>
+nnoremap <silent><Leader>c :noh<CR>
 
 " Coc Config
 set cmdheight=2
@@ -63,10 +73,30 @@ set nobackup
 set nowritebackup
 set shortmess+=c
 
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
 " Coc only does snippet and additional edit on confirm.
-" inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 " Or use `complete_info` if your vim support it, like:
-inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+
+vmap <silent><Leader>z :CocFix<CR>
+nmap <silent><Leader>z :CocFix<CR>
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
@@ -111,7 +141,6 @@ nmap <leader>rn <Plug>(coc-rename)
 nmap <leader>ac  <Plug>(coc-codeaction)
 " Fix autofix problem of current line
 nmap <leader>qf  <Plug>(coc-fix-current)
-
 " Use <tab> for select selections ranges, needs server support, like: coc-tsserver, coc-python
 nmap <silent> <TAB> <Plug>(coc-range-select)
 xmap <silent> <TAB> <Plug>(coc-range-select)
@@ -127,7 +156,11 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 " Add status line support, for integration with other plugin, checkout `:h coc-status`
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+" set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+function! CocCurrentFunction()
+    return get(b:, 'coc_current_function', '')
+endfunction
 
 " Using CocList
 " Show all diagnostics
@@ -149,6 +182,18 @@ nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
 
 " display lightline
+let g:lightline = {
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'cocstatus', 'currentfunction', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component_function': {
+      \   'cocstatus': 'coc#status',
+      \   'currentfunction': 'CocCurrentFunction',
+      \   'gitbranch': 'gitbranch#name'
+      \ },
+      \ }
+
 set title
 set laststatus=2
 set noshowmode
