@@ -1,22 +1,35 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'dylanaraps/wal.vim'
 Plug 'lifepillar/vim-solarized8'
 Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
 " Plug 'leafgarland/typescript-vim'
+Plug 'tpope/vim-surround'
 Plug 'itchyny/lightline.vim'
 Plug 'ryanoasis/vim-devicons'
 Plug 'junegunn/fzf.vim'
 Plug 'scrooloose/nerdtree'
-Plug 'itchyny/vim-gitbranch'
- 
+" Plug 'itchyny/vim-gitbranch'
+Plug 'tpope/vim-fugitive'
+Plug 'raimondi/delimitmate'
+Plug 'alvan/vim-closetag'
+Plug 'jonsmithers/vim-html-template-literals' 
+
 call plug#end()
 
+let g:closetag_filetypes = 'html,xhtml,phtml,javascript,typescript'
+let g:closetag_regions = {
+      \ 'javascript':     'litHtmlRegion',
+      \ 'typescript':     'litHtmlRegion',
+      \ }
 " set path=.,src,node_nodules
 
 set termguicolors
 set background=dark
+" colorscheme wal 
+" let g:solarized_termcolors=256
 colorscheme solarized8
-let g:solarized_termtrans = 1
+" let g:solarized_termtrans = 1
 
 set listchars=tab:→\ ,trail:─,extends:❭,precedes:❬,nbsp:+
 set fillchars=vert:┃,fold:-
@@ -54,7 +67,33 @@ set incsearch
 set hlsearch
 
 let g:fzf_command_prefix = 'Fzf'
-let g:coc_global_extensions = ['coc-tsserver', 'coc-emmet', 'coc-tslint-plugin']
+let g:coc_global_extensions = [
+            \ 'coc-tsserver', 
+            \ 'coc-tslint-plugin', 
+            \ 'coc-emmet', 
+            \ 'coc-snippets', 
+            \ 'coc-highlight', 
+            \ 'coc-lists', 
+            \ 'coc-tabnine', 
+            \ 'coc-html', 
+            \ 'coc-css', 
+            \ 'coc-yank']      
+
+" grep word under cursor
+command! -nargs=+ -complete=custom,s:GrepArgs Rg exe 'CocList grep '.<q-args>
+
+function! s:GrepArgs(...)
+  let list = ['-S', '-smartcase', '-i', '-ignorecase', '-w', '-word',
+        \ '-e', '-regex', '-u', '-skip-vcs-ignores', '-t', '-extension']
+  return join(list, "\n")
+endfunction
+
+" Keymapping for grep word under cursor with interactive mode
+nnoremap <silent> <Leader>cf :exe 'CocList -I --input='.expand('<cword>').' grep'<CR>
+
+nnoremap <silent> <space>w  :exe 'CocList -I --normal --input='.expand('<cword>').' words'<CR>
+
+nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 
 nnoremap <silent><Leader>o :FzfFiles<CR>
 nnoremap <silent><Leader>O :FzfFiles!<CR>
@@ -63,7 +102,7 @@ nnoremap <silent><Leader>s :FzfAg<CR>
 nnoremap <silent><Leader><Space> :FzfGTags<CR>
 nnoremap <silent>; :FzfBuffers<CR>
 nnoremap <silent><Leader>n :NERDTreeToggle<CR>
-nnoremap <silent><Leader>c :noh<CR>
+nnoremap <silent><CR> :noh<CR>
 
 " Coc Config
 set cmdheight=2
@@ -147,14 +186,14 @@ xmap <silent> <TAB> <Plug>(coc-range-select)
 xmap <silent> <S-TAB> <Plug>(coc-range-select-backword)
 
 " Use `:Format` to format current buffer
-command! -nargs=0 Format :call CocAction('format')
+command! -nargs=0 Format :call CocActionAsync('runCommand', 'tsserver.format')
 
 " Use `:Fold` to fold current buffer
-command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+command! -nargs=? Fold :call CocAction('fold', <f-args>)
 
 " use `:OR` for organize import of current buffer
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
-
+command! -nargs=0 OR   :call CocActionAsync('runCommand', 'tsserver.organizeImports')
+command! -nargs=0 FX   :call CocActionAsync('runCommand', 'tsserver.executeAutofix')
 " Add status line support, for integration with other plugin, checkout `:h coc-status`
 " set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
@@ -179,7 +218,8 @@ nnoremap <silent> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
-
+nnoremap <silent> <space>f  :CocAction quickfix <CR>
+nnoremap <silent> <space>q  :FX<CR>
 
 " display lightline
 let g:lightline = {
@@ -190,9 +230,19 @@ let g:lightline = {
       \ 'component_function': {
       \   'cocstatus': 'coc#status',
       \   'currentfunction': 'CocCurrentFunction',
-      \   'gitbranch': 'gitbranch#name'
+      \   'gitbranch': 'fugitive#name',
+      \   'filetype': 'Filetype',
+      \   'fileformat': 'Fileformat'
       \ },
       \ }
+
+function! Filetype()
+  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype . ' ' . WebDevIconsGetFileTypeSymbol() : 'no ft') : ''
+endfunction
+
+function! Fileformat()
+  return winwidth(0) > 70 ? (&fileformat . ' ' . WebDevIconsGetFileFormatSymbol()) : ''
+endfunction
 
 set title
 set laststatus=2
