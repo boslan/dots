@@ -2,8 +2,22 @@ bindkey -v
 set -o vi
 KEYTIMEOUT=1
 
+setopt autocd
+
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=1000
+setopt SHARE_HISTORY
+
+zstyle ':completion:*' menu select
+
 export EDITOR=vim
 export VISUAL=vim
+
+autoload -U compinit promptinit
+compinit
+promptinit
+prompt agnoster
 
 # Terminal colors
 (cat ~/.cache/wal/sequences &)
@@ -13,21 +27,15 @@ source ~/.cache/wal/colors-tty.sh
 source /usr/share/fzf/key-bindings.zsh
 source /usr/share/fzf/completion.zsh
 
+source ~/.zsh/themes/agnoster.zsh-theme
+
 #Syntax highlighting
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
 source ~/.zsh/zsh-interactive-cd.plugin.zsh
 
 # Autosuggestions
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-#NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# projects aliases
-alias radaro='cd ~/projects/delivery-front && gulp'
-alias etools='cd ~/projects/etools-infra && fab devup:quick'
 
 export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_DEFAULT_OPTS="--layout=reverse --inline-info --height 40%" 
